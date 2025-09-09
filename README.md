@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BBQ Subscription Manager
+
+A Next.js application for managing Base blockchain subscriptions using the Base SDK.
+
+## Features
+
+- **Create Wallet**: Generate a new wallet to own subscriptions
+- **Create Subscription**: Set up a $19.99/month subscription on Base
+- **Get Subscription Status**: Check if subscription is active and view details
+- **Charge Subscription**: Charge $1 from the subscription using the created wallet
+
+## Tech Stack
+
+- Next.js 14 with App Router
+- TypeScript
+- Tailwind CSS
+- Base SDK (@base-org/account)
+- Viem for Ethereum interactions
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ installed
+- npm or yarn package manager
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd bbq-subscription
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Copy the environment example file (optional):
+```bash
+cp env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-To learn more about Next.js, take a look at the following resources:
+## Usage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Create Wallet**: Click "Create Wallet" to generate a new wallet address
+2. **Create Subscription**: After creating a wallet, click "Create Subscription" to set up a $19.99/month subscription
+3. **Check Status**: Use "Get Subscription Status" to verify the subscription is active
+4. **Charge**: Click "Charge $1 from Subscription" to process a payment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Important Notes
 
-## Deploy on Vercel
+- This is a demo application. In production:
+  - Never expose private keys to the frontend
+  - Store private keys securely in a backend service
+  - Implement proper authentication and authorization
+  - Use environment variables for sensitive configuration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API Routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `POST /API/create-wallet`: Creates a new wallet and returns the address
+- `POST /API/charge-subscription`: Charges a subscription using the provided subscription ID and wallet
+
+## Project Structure
+
+```
+bbq-subscription/
+├── app/
+│   ├── API/              # Backend API routes
+│   │   ├── create-wallet/
+│   │   └── charge-subscription/
+│   ├── page.tsx          # Main page
+│   ├── layout.tsx        # Root layout
+│   └── globals.css       # Global styles
+├── components/
+│   └── SubscriptionManager.tsx  # Main UI component
+├── spec/
+│   └── spec.md           # Original specification
+└── package.json
+```
+
+## Development
+
+```bash
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
+
+# Run linting
+npm run lint
+```
+
+## License
+
+MIT
