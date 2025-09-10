@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "BBQ Subscription Manager",
+  title: "Subscription Demo",
   description: "Manage Base blockchain subscriptions with ease",
 };
 
