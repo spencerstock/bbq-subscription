@@ -23,12 +23,19 @@ interface SubscriptionStatus {
   subscriptionPayer?: string;
 }
 
+interface ErrorInfo {
+  title: string;
+  message: string;
+  details?: string;
+  type?: 'gas' | 'error';
+}
+
 export default function SubscriptionManager() {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [loading, setLoading] = useState<Record<string, boolean>>({});
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | ErrorInfo | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showBackendPanel, setShowBackendPanel] = useState(false);
 
@@ -180,7 +187,25 @@ export default function SubscriptionManager() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to charge subscription');
+        // Handle structured error responses from the API
+        if (data.error === 'Insufficient Gas') {
+          setError({
+            title: data.error,
+            message: data.message,
+            details: data.details,
+            type: 'gas'
+          } as any);
+        } else if (data.error) {
+          setError({
+            title: data.error,
+            message: data.message || data.error,
+            details: data.details,
+            type: 'error'
+          } as any);
+        } else {
+          throw new Error(data.error || 'Failed to charge subscription');
+        }
+        return;
       }
 
       if (data.success) {
@@ -292,8 +317,11 @@ export default function SubscriptionManager() {
 
               {wallet && (
                 <div className="mt-2 p-2 bg-gray-800/50 rounded text-xs">
-                  <p className="text-gray-400 mb-1">Wallet:</p>
-                  <p className="font-mono text-gray-300 truncate">{wallet.address}</p>
+                  <p className="text-gray-400 mb-1">Server Wallet:</p>
+                  <p className="font-mono text-gray-300 break-all">{wallet.address}</p>
+                  <p className="text-yellow-400 mt-2 text-[10px] leading-tight">
+                    ⚠️ Add Base Sepolia ETH to this wallet for gas fees to execute subscription charges
+                  </p>
                 </div>
               )}
             </div>
@@ -315,13 +343,48 @@ export default function SubscriptionManager() {
 
         {/* Alert Messages */}
         {(error || success) && (
-          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-slideDown">
+          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-slideDown max-w-lg">
             {error && (
-              <div className="glass-effect bg-red-500/20 border-red-500/50 text-white px-6 py-3 rounded-lg flex items-center space-x-2">
-                <svg className="w-5 h-5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                  <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span>{error}</span>
+              <div className={`glass-effect ${
+                typeof error === 'object' && error.type === 'gas' 
+                  ? 'bg-yellow-500/20 border-yellow-500/50' 
+                  : 'bg-red-500/20 border-red-500/50'
+              } text-white px-6 py-4 rounded-lg`}>
+                {typeof error === 'object' ? (
+                  <div>
+                    <div className="flex items-start space-x-2 mb-2">
+                      {error.type === 'gas' ? (
+                        <svg className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                          <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                          <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                      )}
+                      <div className="flex-1">
+                        <p className="font-semibold text-base">{error.title}</p>
+                        <p className="text-sm text-white/90 mt-1">{error.message}</p>
+                        {error.details && (
+                          <p className="text-xs text-white/70 mt-2">{error.details}</p>
+                        )}
+                        {error.type === 'gas' && wallet && (
+                          <div className="mt-3 p-2 bg-black/20 rounded">
+                            <p className="text-xs text-white/80 mb-1">Server wallet address:</p>
+                            <p className="font-mono text-xs text-white break-all">{wallet.address}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-5 h-5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                      <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>{error}</span>
+                  </div>
+                )}
               </div>
             )}
             

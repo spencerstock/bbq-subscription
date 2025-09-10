@@ -72,23 +72,46 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Charge failed:', error);
     
-    // Handle specific error cases
-    if (error.message?.includes('insufficient') || error.message?.includes('exceeds')) {
+    // Handle gas-related errors
+    if (error.message?.includes('insufficient funds') || 
+        error.message?.includes('insufficient balance') ||
+        error.message?.includes('gas required exceeds') ||
+        error.message?.includes('AA21') || // UserOp reverted - insufficient funds for gas
+        error.message?.includes('AA40') || // Over verification gas limit
+        error.message?.includes('prefund') ||
+        error.message?.toLowerCase().includes('gas')) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Insufficient funds or charge limit exceeded',
+          error: 'Insufficient Gas',
+          message: 'The server wallet needs Base Sepolia ETH for gas fees',
+          details: 'Please add Base Sepolia ETH to the server wallet address shown above to execute subscription charges.',
+          originalError: error.message
+        },
+        { status: 400 }
+      );
+    }
+    
+    // Handle charge limit errors
+    if (error.message?.includes('exceeds')) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Charge Limit Exceeded',
+          message: 'The charge amount exceeds the remaining allowance for this period',
           details: error.message
         },
         { status: 400 }
       );
     }
     
+    // Handle subscription status errors
     if (error.message?.includes('revoked') || error.message?.includes('cancelled')) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Subscription is cancelled or revoked',
+          error: 'Subscription Inactive',
+          message: 'The subscription has been cancelled or revoked',
           details: error.message
         },
         { status: 400 }
@@ -98,7 +121,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false, 
-        error: error.message || 'Failed to charge subscription'
+        error: 'Transaction Failed',
+        message: error.message || 'Failed to charge subscription',
+        details: 'An unexpected error occurred while processing the charge'
       },
       { status: 500 }
     );
