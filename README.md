@@ -1,6 +1,6 @@
-# Subscription Manager
+# Subscription Demo
 
-A Next.js application for managing Base blockchain subscriptions using the Base SDK.
+A Next.js application for testing Base blockchain subscriptions using the Base SDK.
 
 ## Features
 
