@@ -1,11 +1,11 @@
-# BBQ Subscription Manager
+# Subscription Manager
 
 A Next.js application for managing Base blockchain subscriptions using the Base SDK.
 
 ## Features
 
 - **Create Wallet**: Generate a new wallet to own subscriptions
-- **Create Subscription**: Set up a $19.99/month subscription on Base
+- **Create Subscription**: Set up a $29.99/month subscription on Base
 - **Get Subscription Status**: Check if subscription is active and view details
 - **Charge Subscription**: Charge $1 from the subscription using the created wallet
 
@@ -35,11 +35,6 @@ cd bbq-subscription
 2. Install dependencies:
 ```bash
 npm install
-```
-
-3. Copy the environment example file (optional):
-```bash
-cp env.example .env.local
 ```
 
 4. Run the development server:
